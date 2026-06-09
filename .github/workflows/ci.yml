@@ -10,26 +10,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  shell:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-
-      - name: Install
-        run: npm ci
-
-      # Placeholder Vite env so `npm run build` passes without repo secrets (fork PRs stay green).
-      # Production values live in Vercel → Environment Variables (see README / AppStarter).
-      - name: Build
-        run: npm run build
-        env:
-          VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
-          VITE_SUPABASE_ANON_KEY: sb_publishable_ci_placeholder_not_used_at_runtime
+      - name: Confirm reset shell
+        run: |
+          test -f README.md
+          test -f GOLD.md
+          test ! -d src || (echo "Expected no src/ until you scaffold" && exit 1)
