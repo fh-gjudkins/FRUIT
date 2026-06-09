@@ -1,0 +1,24 @@
+---
+description: Feature delivery — reuse UI, add product analytics, keep monitoring/errors in scope
+globs: src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Feature delivery
+
+When implementing **user-facing** behavior in this app:
+
+## UI
+
+- Before new components, check `src/components/` and existing routes for reusable pieces; extend them when possible.
+
+## Product analytics
+
+- Instrument meaningful actions (auth, core flows, primary CTAs) with stable event names and non-PII properties.
+- If a `track` / `trackEvent` helper exists, use it; otherwise add `src/lib/analytics.ts` and wire to Posthog/Vercel/etc. per project docs — avoid leaving features permanently uninstrumented.
+
+## Monitoring and errors
+
+- Surface async failures to the user; log or report with enough context to debug. Align with whatever error reporting the stack uses when present.
+
+For the full playbook (copy into prompts): GOLD `docs/feature-agent-playbook.md` if you use the shared monorepo.
