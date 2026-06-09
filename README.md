@@ -2,26 +2,46 @@
 
 Lightweight work tracking: **nested buckets**, **tasks** (title, description, optional checklist), **Pomodoro timers** linked to tasks, and an **append-style activity log** (created, updated, timer start/stop, checklist events). Timer totals **roll up** to each bucket via the `bucket_timer_totals()` RPC.
 
+This repo is meant to match the **[AppStarter](https://github.com/gjudki/GOLD/blob/main/docs/AppStarter.md)** playbook in **GOLD**: **Vercel is the deploy authority** (Git-connected builds from `main`). There is **no** GitHub Action that runs `vercel deploy`.
+
 ## Stack
 
 - [Vite](https://vitejs.dev/) + React + TypeScript  
 - [TanStack Router](https://tanstack.com/router) + [TanStack Query](https://tanstack.com/query)  
-- [Supabase](https://supabase.com/) (Postgres + Auth + RLS)
+- [Supabase](https://supabase.com/) (Postgres + Auth + RLS)  
+- [Vercel](https://vercel.com/) — production hosting + previews from Git
 
-## Supabase setup
+## Bootstrap (same order as AppStarter)
 
-1. Create a project and run the SQL migration:  
-   `supabase/migrations/20250609000000_init_fruit.sql`  
-   (Supabase SQL editor, or `supabase db push` if you use the CLI.)
+Full detail, MCP steps, and edge cases: **[docs/AppStarter.md (GOLD)](https://github.com/gjudki/GOLD/blob/main/docs/AppStarter.md)**.
 
-2. **Auth → Providers → Google**: enable Google, add OAuth client id/secret, and set redirect URL to your app origin (e.g. `http://localhost:5173` for local dev).
+### 1. Supabase
 
-3. Copy `.env.example` to `.env` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+1. Create a project and run **`supabase/migrations/20250609000000_init_fruit.sql`** (SQL editor or `supabase db push` with the CLI).
+2. **Project Settings → API** — copy **Project URL** (`https://<project-ref>.supabase.co`) and the **`anon` `public`** key (never `service_role` in the browser).
 
-## Deploy (GitHub Actions + Vercel)
+### 2. Vercel (deploy authority)
 
-Production-only flow: push to **`main`** (or run the **Deploy (Production)** workflow manually).  
-Bootstrap checklist (canonical copy in **GOLD**): **[AppStarter.md in gjudki/GOLD](https://github.com/gjudki/GOLD/blob/main/docs/AppStarter.md)**.
+1. **Vercel → Add New → Project → Import** this GitHub repo.
+2. **Framework:** Vite · **Root:** `.` · **Build Command:** `npm run build` · **Output:** `dist` · **Production branch:** `main`.
+3. **Project → Settings → Environment Variables** — add for **Production** (and **Preview** if previews should hit a real DB):
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`  
+   Then **Redeploy** so the client bundle picks them up.
+4. **Do not** re-introduce a GitHub workflow that runs `vercel deploy` — that would be a second deploy pipeline. Optional **PR-only** CI is in **`.github/workflows/ci.yml`** (`npm run build` with placeholders).
+
+### 3. Supabase Auth URLs
+
+After you have the **production URL** from Vercel (e.g. `https://<project>.vercel.app`), configure **Authentication → URL configuration** in Supabase (**Site URL**, **Redirect URLs**, Google OAuth per AppStarter).
+
+### 4. Google OAuth (optional)
+
+**Authentication → Providers → Google** in Supabase; use the redirect/origin guidance in AppStarter and in Google Cloud Console.
+
+### 5. Local dev
+
+1. Copy `.env.example` → `.env` with the same `VITE_*` values as in **Vercel Production** (or a separate dev Supabase project).
+2. `npm install` && `npm run dev`.
 
 ## Run locally
 

@@ -26,7 +26,8 @@ jobs:
       - name: Install
         run: npm ci
 
-      # Intentionally no real Supabase secrets: keeps fork PRs green. Deploy workflow uses env secrets.
+      # Placeholder Vite env so `npm run build` passes without repo secrets (fork PRs stay green).
+      # Production values live in Vercel → Environment Variables (see README / AppStarter).
       - name: Build
         run: npm run build
         env:
