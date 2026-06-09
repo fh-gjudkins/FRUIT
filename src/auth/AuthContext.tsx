@@ -26,12 +26,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false
-    supabase.auth.getSession().then(({ data }) => {
-      if (!cancelled) {
-        setSession(data.session ?? null)
-        setLoading(false)
-      }
-    })
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (!cancelled) {
+          setSession(data.session ?? null)
+          setLoading(false)
+        }
+      })
+      .catch((err) => {
+        console.error('[FRUIT] auth.getSession failed — check .env Supabase URL/key.', err)
+        if (!cancelled) setLoading(false)
+      })
     const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
       setSession(next)
     })
